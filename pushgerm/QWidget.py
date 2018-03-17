@@ -1,80 +1,94 @@
 import sys
-from PyQt5.QtWidgets import *
-import matplotlib.pyplot as plt
+
+from PyQt5.QtWidgets import * #import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
+from PyQt5.QtGui import QIcon, QPixmap
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.image import imread
 
 
-class FFTWindow(QWidget):
+class App(QMainWindow):
+
     def __init__(self):
-        QWidget.__init__(self)
-        self.setWindowTitle("Fast Fourier Transformation")   #창 title
-        self.setGeometry(400, 100, 1000, 800)  #창의 위치 및 사이즈(x, y, width, height)
-        self.setupUI()
+        super().__init__()
+        self.left = 100
+        self.top = 100
+        self.title = 'FFT project'
+        self.width = 1500
+        self.height = 800
 
-    def setupUI(self):
+        mainMenu = self.menuBar()
+        fileMenu = mainMenu.addMenu('File')
 
-        #버튼 구성
-        self.btn1 = QPushButton("Load Data", self)  #데이터 불러오는 버튼 생성
-        self.btn1.move(100, 550)
-        self.btn1.resize(300, 50)
-        self.btn1.clicked.connect(self.loadData)  #클릭시 csv파일 선택해 열기
+        loadButton = QAction('load', self)
+        loadButton.triggered.connect(self.loadData)
 
-        self.btn2 = QPushButton("Transform", self)  #fft로 변환하는 버튼 생성
-        self.btn2.move(100, 650)
-        self.btn2.resize(300, 50)
-        #self.btn2.clocked.connect(datatransform()) # 클릭시 fft로 변환
+        exitButton = QAction(QIcon('a.png'), 'Exit', self)
+        exitButton.triggered.connect(self.close)
+        fileMenu.addAction(loadButton)
+        fileMenu.addAction(exitButton)
 
-        #그래프 구성
-        self.fig = plt.Figure()
-        self.ax1 = self.fig.add_subplot(211)
-        self.ax2 = self.fig.add_subplot(212)
-        self.canvas = FigureCanvas(self.fig)
+        self.initUI()
 
 
+    def initUI(self):
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
 
-        #레이아웃 구성
-        upLayout = QHBoxLayout()
+        label = QLabel(self)
+        pixmap = QPixmap('image.JPG')
+        label.setPixmap(pixmap)
+        label.move(34, 50)
+        label.resize(638, 410)
 
-        rightLayout = QVBoxLayout()
-        rightLayout.addWidget(self.canvas)
+        btn1 = QPushButton('Load Data', self)
+        btn1.move(250, 550)
+        btn1.resize(200, 50)
+        btn1.clicked.connect(self.loadData)  #클릭시 csv파일 선택해 열기
 
-        leftLayout = QVBoxLayout()
-        leftLayout.addWidget(self.btn1)
-        leftLayout.addWidget(self.btn2)
-        leftLayout.addStretch(1)
+        btn2 = QPushButton('Transform', self)
+        btn2.move(250, 650)
+        btn2.resize(200, 50)
 
-        bottomLayout = QHBoxLayout()
-        bottomLayout.addLayout(leftLayout)
-        bottomLayout.addLayout(rightLayout)
-        bottomLayout.setStretchFactor(leftLayout, 1)
-        bottomLayout.setStretchFactor(rightLayout, 5)
+        self.m = PlotCanvas(self, width=8, height=8)
+        self.m.move(700, 0)
 
-        layout = QVBoxLayout()
-        layout.addLayout(upLayout)
-        layout.addLayout(bottomLayout)
-
-        self.setLayout(layout)
+        self.show()
 
     def loadData(self):
         fname = QFileDialog.getOpenFileName(self)[0]
         file_extension = fname.split('.')[-1]
 
+        self.canOpenData = True
         input = np.loadtxt(fname, delimiter = ',', dtype = np.float32)
 
-        x = input[:, 3:4]
-        y = input[:, 4:5]
+        self.x = input[:, 3:4]
+        self.y = input[:, 4:5]
+        self.m.plot(self.x, self.y)
+
+class PlotCanvas(FigureCanvas):
+
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
+
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+        self.ax1 = self.figure.add_subplot(211)
+        self.ax2 = self.figure.add_subplot(212)
+
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+
+    def plot(self, x, y):
+
         self.ax1.plot(x, y)
         self.ax1.hold(False)
-        self.canvas.draw()
-
-    def datatransform(self):
-        # 위 데이터를 변환해서 밑에 그래프에 구현
-        pass
+        self.draw()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = FFTWindow()
-    window.show()
-    app.exec_()
+    ex = App()
+    sys.exit(app.exec_())
