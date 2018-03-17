@@ -63,10 +63,15 @@ class App(QMainWindow):
 
         self.canOpenData = True
         input = np.loadtxt(fname, delimiter = ',', dtype = np.float32)
-
-        self.x = input[:, 3:4]
-        self.y = input[:, 4:5]
-        self.m.plot(self.x, self.y)
+        print(fname[-8:-4])
+        if(fname[-7:-4] =="acc"):
+            self.time = input[:, 6:7]
+            self.x = input[:, 4:5]
+            self.m.plot_acc(self.time, self.x)
+        elif(fname[-8:-4]=="temp"):
+            self.time = input[:, 5:6]
+            self.x = input[:, 4:5]
+            self.m.plot_temp(self.time, self.x)
 
 class PlotCanvas(FigureCanvas):
 
@@ -81,9 +86,15 @@ class PlotCanvas(FigureCanvas):
         FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
-    def plot(self, x, y):
+    def plot_acc(self, time1, x):
 
-        self.ax1.plot(x, y)
+        self.ax1.plot(time1, x, label = 'x acceleration')
+        #self.ax1.plot(time1, y, label = 'y acceleration')
+        self.ax1.hold(False)
+        self.draw()
+
+    def plot_temp(self, time, x):
+        self.ax1.plot(time, x, label = 'temp')
         self.ax1.hold(False)
         self.draw()
 
