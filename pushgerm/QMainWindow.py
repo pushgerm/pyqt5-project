@@ -52,32 +52,33 @@ class App(QMainWindow):
         btn2.move(250, 650)#버튼 위치
         btn2.resize(200, 50)#버튼 크기
 
-        self.m = PlotCanvas(self, width=8, height=8)#윈도우창에 그래프 삽입
-        self.m.move(700, 0)#그래프 위치
+        self.canvas = PlotCanvas(self, width=8, height=8)#윈도우창에 그래프 삽입
+        self.canvas.move(700, 0)#그래프 위치
 
         self.show()
 
     def loadData(self):
-        fname = QFileDialog.getOpenFileName(self)[0]
-        file_extension = fname.split('.')[-1]
+        fpath = QFileDialog.getOpenFileName(self)[0]    # 파일의 절대경로를 받아온다
+        fname = fpath.split('/')[-1]    # 절대경로를 '/' 기준으로 슬라이싱 해서 파일 이름만 받아옴
+        file_extension = fname.split('.')[-1]   # 파일이름을 '.' 으로 슬라이싱해서 확장자명을 받아옴
 
         # .csv파일이 아니면 에러창 띄움
         if file_extension != "csv":
             PopUpWindow()
             return
 
-        input = np.loadtxt(fname, delimiter = ',', dtype = np.float32)
+        input = np.loadtxt(fpath, delimiter = ',', dtype = np.float32)  # 파일의 절대경로를 넣어준다
         ndata = input.shape[0]
-        if(fname[-7:-4] =="acc"):
+        if(fname[0:3] =="acc"):
             #self.time = input[:, 6:7]#시간데이터를 새로 만들었음 기존 usec을 쓰면 데이터가 겹침
             self.time = np.array([[x] for x in range(1, ndata + 1)])
             self.x = input[:, 4:5]#x가속도 데이터
             self.y = input[:, 5:6]#y가속도 데이터
-            self.m.plot_acc(self.time, self.x, self.y)#acc.csv그래프 그리기
-        elif(fname[-8:-4]=="temp"):
+            self.canvas.plot_acc(self.time, self.x, self.y)#acc.csv그래프 그리기
+        elif(fname[0:4]=="temp"):
             self.time = input[:, 5:6]#시간데이터를 새로만듦
             self.x = input[:, 4:5]#온도
-            self.m.plot_temp(self.time, self.x)#temp.csv그래프 그리기
+            self.canvas.plot_temp(self.time, self.x)#temp.csv그래프 그리기
 
 class PlotCanvas(FigureCanvas):
 
@@ -119,7 +120,7 @@ class PopUpWindow(QWidget):
         fg.moveCenter(cp)
         self.move(fg.topLeft())
 
-        buttonReply = QMessageBox.question(self, "Error", "Failed to load data.\ncsv file (.csv) only", QMessageBox.Yes)
+        QMessageBox.question(self, "Error", "Failed to load data.\ncsv file (.csv) only", QMessageBox.Yes)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
