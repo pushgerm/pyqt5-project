@@ -1,12 +1,12 @@
 import sys
 
 from PyQt5.QtWidgets import * #import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPixmap
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
 import matplotlib.pyplot as plt
-import random
+from matplotlib.image import imread
 
 
 class App(QMainWindow):
@@ -15,8 +15,8 @@ class App(QMainWindow):
         super().__init__()
         self.left = 100
         self.top = 100
-        self.title = 'PyQt5 matplotlib example - pythonspot.com'
-        self.width = 1000
+        self.title = 'FFT project'
+        self.width = 1500
         self.height = 800
 
         mainMenu = self.menuBar()
@@ -37,17 +37,23 @@ class App(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
+        label = QLabel(self)
+        pixmap = QPixmap('image.JPG')
+        label.setPixmap(pixmap)
+        label.move(34, 50)
+        label.resize(638, 410)
+
         btn1 = QPushButton('Load Data', self)
-        btn1.move(50, 600)
+        btn1.move(250, 550)
         btn1.resize(200, 50)
         btn1.clicked.connect(self.loadData)  #클릭시 csv파일 선택해 열기
 
         btn2 = QPushButton('Transform', self)
-        btn2.move(50, 700)
+        btn2.move(250, 650)
         btn2.resize(200, 50)
 
-        self.m = PlotCanvas(self, width=7, height=8)
-        self.m.move(300, 0)
+        self.m = PlotCanvas(self, width=8, height=8)
+        self.m.move(700, 0)
 
         self.show()
 
@@ -77,8 +83,8 @@ class PlotCanvas(FigureCanvas):
 
     def plot(self, x, y):
 
-        self.m.ax1.plot(x, y)
-        self.m.ax1.hold(False)
+        self.ax1.plot(x, y)
+        self.ax1.hold(False)
         self.draw()
 
 
