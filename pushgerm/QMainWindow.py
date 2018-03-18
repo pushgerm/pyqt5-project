@@ -69,15 +69,13 @@ class App(QMainWindow):
 
         input = np.loadtxt(fpath, delimiter = ',', dtype = np.float32)  # 파일의 절대경로를 넣어준다
         ndata = input.shape[0]
+        self.time = np.array([[x] for x in range(1, ndata + 1)])
+
         if(fname[0:3] =="acc"):
-            #self.time = input[:, 6:7]#시간데이터를 새로 만들었음 기존 usec을 쓰면 데이터가 겹침
-            self.time = np.array([[x] for x in range(1, ndata + 1)])
             self.x = input[:, 4:5]#x가속도 데이터
             self.y = input[:, 5:6]#y가속도 데이터
             self.canvas.plot_acc(self.time, self.x, self.y)#acc.csv그래프 그리기
         elif(fname[0:4]=="temp"):
-            #self.time = input[:, 5:6]#시간데이터를 새로만듦
-            self.time = np.array([[x] for x in range(1, ndata + 1)])
             self.x = input[:, 4:5]#온도
             self.canvas.plot_temp(self.time, self.x)#temp.csv그래프 그리기
 
