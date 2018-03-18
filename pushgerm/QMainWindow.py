@@ -76,7 +76,8 @@ class App(QMainWindow):
             self.y = input[:, 5:6]#y가속도 데이터
             self.canvas.plot_acc(self.time, self.x, self.y)#acc.csv그래프 그리기
         elif(fname[0:4]=="temp"):
-            self.time = input[:, 5:6]#시간데이터를 새로만듦
+            #self.time = input[:, 5:6]#시간데이터를 새로만듦
+            self.time = np.array([[x] for x in range(1, ndata + 1)])
             self.x = input[:, 4:5]#온도
             self.canvas.plot_temp(self.time, self.x)#temp.csv그래프 그리기
 
