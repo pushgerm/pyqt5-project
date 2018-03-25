@@ -63,13 +63,13 @@ class App(QMainWindow):
         info2.move(500, 430)
         info2.resize(200, 30)
         self.variance = QLabel("", self)
-        self.variance.move(550, 400)
+        self.variance.move(550, 430)
 
         info3 = QLabel("표준편차 : ",self)
         info3.move(500, 460)
         info3.resize(200, 30)
         self.deviation = QLabel("", self)
-        self.deviation.move(550, 400)
+        self.deviation.move(560, 460)
 
     def setButton(self):
         btn1 = QPushButton('Load Data', self)  # 데이터 불러오기 버튼
@@ -130,9 +130,23 @@ class App(QMainWindow):
         sum = 0
         for num in self.x:
             sum += num
-        average = sum / n
-        s = str(average)
+        avg = sum / n
+        s =str(avg)
         self.average.setText(s)
+
+        x2 = self.x**2
+        sum = 0
+        for num in x2:
+            sum += num
+        avg2 = sum/n
+        var = avg2 - avg**2
+        s = str(var)
+        self.variance.setText(s)
+
+        dev = var**0.5
+        s = str(dev)
+        self.deviation.setText(s)
+
 
 
 
@@ -157,14 +171,14 @@ class PlotCanvas(FigureCanvas):
         self.ax1.plot(time1, y, label = 'y acceleration')
         self.ax1.set_xlabel('time')#name of x axe
         self.ax1.set_ylabel('acceleration')#name of y axe
-        #self.ax1.hold(False)#data reset when the new data come
+        self.ax1.hold(False)#data reset when the new data come
         self.draw()
 
     def plot_temp(self, time, x):
         self.ax1.plot(time, x, label = 'temp')
         self.ax1.set_xlabel('time')#name of x axe
         self.ax1.set_ylabel('temperature')#name of y axe
-        #self.ax1.hold(False)#data reset when the new data come
+        self.ax1.hold(False)#data reset when the new data come
         self.draw()
 
 class PopUpWindow(QWidget):
