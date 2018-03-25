@@ -131,7 +131,8 @@ class App(QMainWindow):
         for num in self.x:
             sum += num
         average = sum / n
-        self.average.setText("%f", average)
+        s = str(average)
+        self.average.setText(s)
 
 
 
