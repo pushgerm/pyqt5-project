@@ -35,7 +35,8 @@ class App(QMainWindow):
 
     def initUI(self):
         self.setWindowTitle(self.title)#윈도우창 타이틀
-        self.setGeometry(self.left, self.top, self.width, self.height)  #전체 윈도우 창 위치 및 크기
+        self.move(self.left, self.top)
+        self.setFixedSize(self.width, self.height)
 
         image = QLabel(self)    #사진 넣을 공간 마련
         pixmap = QPixmap('image.JPG')   # 사진 불러오기
