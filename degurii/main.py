@@ -10,14 +10,23 @@ from matplotlib.image import imread
 
 
 class App(QMainWindow):
-
     def __init__(self):
         super().__init__()
+
+        # window property
         self.left = 100#윈도우창 x축 위치
         self.top = 100#윈도우창 y축 위치
         self.title = 'FFT project'#윈도우창 이름
         self.width = 1500#윈도우창 너비
         self.height = 800#윈도우창 높이
+
+        # data statistics
+        self.average = None
+        self.variance = None
+        self.deviation = None
+
+        # graph
+        self.canvas = None
 
         mainMenu = self.menuBar()#메뉴바 생성
         fileMenu = mainMenu.addMenu('File')#메뉴바에 File 메뉴 추가
@@ -39,21 +48,21 @@ class App(QMainWindow):
         self.setFixedSize(self.width, self.height)
 
         image = QLabel(self)    #사진 넣을 공간 마련
-        pixmap = QPixmap('image.JPG')   # 사진 불러오기
+        pixmap = QPixmap('image.png')   # 사진 불러오기
         image.setPixmap(pixmap) # 레이블에 사진 삽입
         image.move(175, 50) #사진위치조정
         image.resize(478, 307)  #사진 크기조정(실제사이즈=638x410)
 
-        self.setinfo()
+        self.setInfo()
         self.setButton()    #버튼 생성
-
 
         self.canvas = PlotCanvas(self, width=8, height=8)   #윈도우창에 그래프 삽입
         self.canvas.move(700, 0)    #그래프 위치
 
         self.show()
 
-    def setinfo(self):
+
+    def setInfo(self):
         info1 = QLabel("평균 : ",self)
         info1.move(500, 400)
         info1.resize(200, 30)
@@ -72,35 +81,34 @@ class App(QMainWindow):
         self.deviation = QLabel("", self)
         self.deviation.move(560, 460)
 
+
     def setButton(self):
-        btn1 = QPushButton('Load Data', self)  # 데이터 불러오기 버튼
-        btn1.move(0, 20)  # 버튼 위치
-        btn1.resize(120, 50)  # 버튼 크기
-        btn1.clicked.connect(self.loadData)  # 클릭시 csv파일 선택해 열기
+        # 첫 번째 버튼 위치
+        first_btn_left = 0
+        first_btn_top = 30
 
-        btn2 = QPushButton('Transform', self)
-        btn2.move(0, 70)
-        btn2.resize(120, 50)
+        # 버튼 크기
+        btn_width = 120
+        btn_height = 50
 
-        btn3 = QPushButton('Option3', self)
-        btn3.move(0, 120)
-        btn3.resize(120, 50)
+        num_btn = 2  # 버튼의 개수
+        space_btn = 5  # 버튼 사이의 간격
 
-        btn4 = QPushButton('Option4', self)
-        btn4.move(0, 170)
-        btn4.resize(120, 50)
+        btn = [QPushButton(self) for i in range(0, num_btn)]
 
-        btn5 = QPushButton('Option5', self)
-        btn5.move(0, 220)
-        btn5.resize(120, 50)
+        # set button text
+        btn[0].setText('Load Data')
+        btn[1].setText('Transform')
 
-        btn6 = QPushButton('Option6', self)
-        btn6.move(0, 270)
-        btn6.resize(120, 50)
+        # set button size, position
+        for i in range(0, num_btn):
+            # 버튼의 위치: 처음 버튼 + (i번째)*(버튼 간격 + 버튼 높이)
+            btn[i].move(first_btn_left, first_btn_top + i * (space_btn + btn_height))
+            btn[i].resize(btn_width, btn_height)
 
-        btn7 = QPushButton('Option7', self)
-        btn7.move(0, 320)
-        btn7.resize(120, 50)
+        # connect to slot
+        btn[0].clicked.connect(self.loadData)  # 클릭시 csv파일 선택해 열기
+
 
     def loadData(self):
         fpath = QFileDialog.getOpenFileName(self)[0]    # 파일의 절대경로를 받아온다
@@ -130,13 +138,14 @@ class App(QMainWindow):
 
         self.getInfo()
 
+
     def getInfo(self):
         n = len(self.x)
         sum = 0
         for num in self.x:
             sum += num
         avg = sum / n
-        s =str(avg)
+        s = str(avg)
         self.average.setText(s)
 
         x2 = self.x**2
@@ -154,11 +163,7 @@ class App(QMainWindow):
 
 
 
-
-
-
 class PlotCanvas(FigureCanvas):
-
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
 
@@ -170,6 +175,7 @@ class PlotCanvas(FigureCanvas):
         #FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         #FigureCanvas.updateGeometry(self)
 
+
     def plot_acc(self, time1, x, y):
 
         self.ax1.plot(time1, x, label='x acceleration')#why doesn't the label show up?
@@ -179,6 +185,7 @@ class PlotCanvas(FigureCanvas):
         self.ax1.hold(False)#data reset when the new data come
         self.draw()
 
+
     def plot_temp(self, time, x):
         self.ax1.plot(time, x, label = 'temp')
         self.ax1.set_xlabel('time')#name of x axe
@@ -186,10 +193,13 @@ class PlotCanvas(FigureCanvas):
         self.ax1.hold(False)#data reset when the new data come
         self.draw()
 
+
+
 class PopUpWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
+
 
     def initUI(self):
         fg = self.frameGeometry()
@@ -198,6 +208,7 @@ class PopUpWindow(QWidget):
         self.move(fg.topLeft())
 
         QMessageBox.question(self, "Error", "Failed to load data.\ncsv file (.csv) only", QMessageBox.Yes)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
