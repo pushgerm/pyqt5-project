@@ -5,8 +5,7 @@ from PyQt5.QtGui import QIcon, QPixmap
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.image import imread
+
 
 
 class App(QMainWindow):
@@ -48,7 +47,7 @@ class App(QMainWindow):
         self.setFixedSize(self.width, self.height)
 
         image = QLabel(self)    #사진 넣을 공간 마련
-        pixmap = QPixmap('image.png')   # 사진 불러오기
+        pixmap = QPixmap('image.jpg')   # 사진 불러오기
         image.setPixmap(pixmap) # 레이블에 사진 삽입
         image.move(175, 50) #사진위치조정
         image.resize(478, 307)  #사진 크기조정(실제사이즈=638x410)
@@ -208,6 +207,7 @@ class PopUpWindow(QWidget):
         self.move(fg.topLeft())
 
         QMessageBox.question(self, "Error", "Failed to load data.\ncsv file (.csv) only", QMessageBox.Yes)
+
 
 
 if __name__ == '__main__':
