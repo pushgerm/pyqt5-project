@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.QtWidgets import * #import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
+from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QPixmap
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -16,7 +16,7 @@ class App(QMainWindow):
         self.top = 100#윈도우창 y축 위치
         self.title = 'FFT project'#윈도우창 이름
         self.width = 1500#윈도우창 너비
-        self.height = 800#윈도우창 높이
+        self.height = 900#윈도우창 높이
 
         # data statistics
         self.average = None
@@ -51,13 +51,16 @@ class App(QMainWindow):
         image.move(175, 50) #사진위치조정
         image.resize(478, 307)  #사진 크기조정(실제사이즈=638x410)
 
-        self.setinfo()
+        self.setinfo()      #평균, 분산 등 정보 생성
         self.setButton()    #버튼 생성
 
 
-        self.canvas = PlotCanvas(self, width=8, height=8)   #윈도우창에 그래프 삽입
-        self.canvas.move(700, 0)    #그래프 위치
-
+        self.canvas_1 = PlotCanvas(self, width=8, height=3)   #윈도우창에 그래프 삽입
+        self.canvas_1.move(700, 0)    #그래프 위치
+        self.canvas_2 = PlotCanvas(self, width=8, height=3)  # 윈도우창에 그래프 삽입
+        self.canvas_2.move(700, 300)
+        self.canvas_3 = PlotCanvas(self, width=8, height=3)   #윈도우창에 그래프 삽입
+        self.canvas_3.move(700, 600)
         self.show()
 
 
@@ -130,10 +133,10 @@ class App(QMainWindow):
         if(fname[0:3] =="acc"):
             self.x = input[:, 4:5]#x가속도 데이터
             self.y = input[:, 5:6]#y가속도 데이터@@@@@일단 x가속도만 가지고 계산하자
-            self.canvas.plot_acc(self.time, self.x, self.y)#acc.csv그래프 그리기
+            self.canvas_1.plot_acc(self.time, self.x, self.y)#acc.csv그래프 그리기
         elif(fname[0:4]=="temp"):
             self.x = input[:, 4:5]#온도
-            self.canvas.plot_temp(self.time, self.x)#temp.csv그래프 그리기
+            self.canvas_2.plot_temp(self.time, self.x)#temp.csv그래프 그리기
 
         self.getInfo()
 
@@ -168,28 +171,32 @@ class PlotCanvas(FigureCanvas):
 
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)#what does this instruction mean?
-        self.ax1 = self.figure.add_subplot(211)# make a subplot1
-        self.ax2 = self.figure.add_subplot(212)# make a subplot 2
+        self.ax1 = self.figure.add_subplot(111, xlim=(0,1), ylim=(0,1), autoscale_on=False)# make a subplot1
+        scale = 1.1 # size how much the graph would be zoomed
+        zp_ax1 = ZoomPan()
+        figZoom_ax1 = zp_ax1.zoom_factory(self.ax1, base_scale=scale)   #can zoome the graph
+        figPan_ax1 = zp_ax1.pan_factory(self.ax1)   #can move the graph
 
         #FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         #FigureCanvas.updateGeometry(self)
 
 
     def plot_acc(self, time1, x, y):
-
+        self.ax1.cla()  #erase graph before draw a new one
         self.ax1.plot(time1, x, label='x acceleration')#why doesn't the label show up?
         self.ax1.plot(time1, y, label = 'y acceleration')
         self.ax1.set_xlabel('time')#name of x axe
         self.ax1.set_ylabel('acceleration')#name of y axe
-        self.ax1.hold(False)#data reset when the new data come
+        #self.ax1.hold(False)#data reset when the new data come
         self.draw()
 
 
     def plot_temp(self, time, x):
+        self.ax1.cla()   #erase graph before draw a new one
         self.ax1.plot(time, x, label = 'temp')
         self.ax1.set_xlabel('time')#name of x axe
         self.ax1.set_ylabel('temperature')#name of y axe
-        self.ax1.hold(False)#data reset when the new data come
+        #self.ax1.hold(False)#data reset when the new data come
         self.draw()
 
 
@@ -207,6 +214,90 @@ class PopUpWindow(QWidget):
         self.move(fg.topLeft())
 
         QMessageBox.question(self, "Error", "Failed to load data.\ncsv file (.csv) only", QMessageBox.Yes)
+
+
+
+class ZoomPan:  #This class can make graph zoomed and move
+    def __init__(self):
+        self.press = None
+        self.cur_xlim = None
+        self.cur_ylim = None
+        self.x0 = None
+        self.y0 = None
+        self.x1 = None
+        self.y1 = None
+        self.xpress = None
+        self.ypress = None
+
+
+    def zoom_factory(self, ax, base_scale = 2.):
+        def zoom(event):
+            cur_xlim = ax.get_xlim()
+            cur_ylim = ax.get_ylim()
+
+            xdata = event.xdata # get event x location
+            ydata = event.ydata # get event y location
+
+            if event.button == 'down':
+                # deal with zoom in
+                scale_factor = 1 / base_scale
+            elif event.button == 'up':
+                # deal with zoom out
+                scale_factor = base_scale
+            else:
+                # deal with something that should never happen
+                scale_factor = 1
+                print (event.button)
+
+            new_width = (cur_xlim[1] - cur_xlim[0]) * scale_factor
+            new_height = (cur_ylim[1] - cur_ylim[0]) * scale_factor
+
+            relx = (cur_xlim[1] - xdata)/(cur_xlim[1] - cur_xlim[0])
+            rely = (cur_ylim[1] - ydata)/(cur_ylim[1] - cur_ylim[0])
+
+            ax.set_xlim([xdata - new_width * (1-relx), xdata + new_width * (relx)])
+            ax.set_ylim([ydata - new_height * (1-rely), ydata + new_height * (rely)])
+            ax.figure.canvas.draw()
+
+        fig = ax.get_figure() # get the figure of interest
+        fig.canvas.mpl_connect('scroll_event', zoom)
+
+        return zoom
+
+
+    def pan_factory(self, ax):
+        def onPress(event):
+            if event.inaxes != ax: return
+            self.cur_xlim = ax.get_xlim()
+            self.cur_ylim = ax.get_ylim()
+            self.press = self.x0, self.y0, event.xdata, event.ydata
+            self.x0, self.y0, self.xpress, self.ypress = self.press
+
+        def onRelease(event):
+            self.press = None
+            ax.figure.canvas.draw()
+
+        def onMotion(event):
+            if self.press is None: return
+            if event.inaxes != ax: return
+            dx = event.xdata - self.xpress
+            dy = event.ydata - self.ypress
+            self.cur_xlim -= dx
+            self.cur_ylim -= dy
+            ax.set_xlim(self.cur_xlim)
+            ax.set_ylim(self.cur_ylim)
+
+            ax.figure.canvas.draw()
+
+        fig = ax.get_figure() # get the figure of interest
+
+        # attach the call back
+        fig.canvas.mpl_connect('button_press_event',onPress)
+        fig.canvas.mpl_connect('button_release_event',onRelease)
+        fig.canvas.mpl_connect('motion_notify_event',onMotion)
+
+        #return the function
+        return onMotion
 
 
 
