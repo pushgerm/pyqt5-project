@@ -53,7 +53,7 @@ class App(QMainWindow):
 
         self.setinfo()      #평균, 분산 등 정보 생성
         self.setButton()    #버튼 생성
-
+        self.inputLabel()   #입력 창 생성
 
         self.canvas_1 = PlotCanvas(self, width=8, height=3)   #윈도우창에 그래프 삽입
         self.canvas_1.move(700, 0)    #그래프 위치
@@ -64,24 +64,53 @@ class App(QMainWindow):
         self.show()
 
 
+    def inputLabel(self):
+        #input_1
+        input_1 = QLabel("input_1 : ",self)
+        input_1.move(200, 400)
+        input_1.resize(200, 30)
+        self.getIn_1 = QLineEdit("", self)
+        self.getIn_1.move(270, 400)
+
+        #input_2
+        input_2 = QLabel("input_2 : ",self)
+        input_2.move(200, 460)
+        input_2.resize(200, 30)
+        self.getIn_2 = QLineEdit("", self)
+        self.getIn_2.move(270, 460)
+
+        #input_3
+        input_3 = QLabel("input_3 : ",self)
+        input_3.move(200, 520)
+        input_3.resize(200, 30)
+        self.getIn_3 = QLineEdit("", self)
+        self.getIn_3.move(270, 520)
+
+        pushButton = QPushButton("send", self)
+        pushButton.move(270, 580)
+        pushButton.resize(100, 30)
+
     def setinfo(self):
+        #평균
         info1 = QLabel("평균 : ",self)
         info1.move(500, 400)
         info1.resize(200, 30)
         self.average = QLabel("", self)
-        self.average.move(550, 400)
+        self.average.move(570, 400)
 
+        #분산
         info2 = QLabel("분산 : ",self)
-        info2.move(500, 430)
+        info2.move(500, 460)
         info2.resize(200, 30)
         self.variance = QLabel("", self)
-        self.variance.move(550, 430)
+        self.variance.move(570, 460)
 
+        #표준편차
         info3 = QLabel("표준편차 : ",self)
-        info3.move(500, 460)
+        info3.move(500, 520)
         info3.resize(200, 30)
         self.deviation = QLabel("", self)
-        self.deviation.move(560, 460)
+        self.deviation.move(570, 520)
 
 
     def setButton(self):
@@ -142,6 +171,7 @@ class App(QMainWindow):
 
 
     def getInfo(self):
+        #평균
         n = len(self.x)
         sum = 0
         for num in self.x:
@@ -150,6 +180,7 @@ class App(QMainWindow):
         s =str(avg)
         self.average.setText(s)
 
+        #분산
         x2 = self.x**2
         sum = 0
         for num in x2:
@@ -159,6 +190,7 @@ class App(QMainWindow):
         s = str(var)
         self.variance.setText(s)
 
+        #표준편차
         dev = var**0.5
         s = str(dev)
         self.deviation.setText(s)
@@ -171,32 +203,33 @@ class PlotCanvas(FigureCanvas):
 
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)#what does this instruction mean?
-        self.ax1 = self.figure.add_subplot(111, xlim=(0,1), ylim=(0,1), autoscale_on=False)# make a subplot1
-        scale = 1.1 # size how much the graph would be zoomed
-        zp_ax1 = ZoomPan()
-        figZoom_ax1 = zp_ax1.zoom_factory(self.ax1, base_scale=scale)   #can zoome the graph
-        figPan_ax1 = zp_ax1.pan_factory(self.ax1)   #can move the graph
+        self.ax = self.figure.add_subplot(111, xlim=(0,1), ylim=(0,1), autoscale_on=False)# make a subplot1
 
+
+        scale = 1.1 # size how much the graph would be zoomed
+        zp_ax = ZoomPan()
+        figZoom_ax = zp_ax.zoom_factory(self.ax, base_scale=scale)   #can zoome the graph
+        figPan_ax = zp_ax.pan_factory(self.ax)   #can move the graph
         #FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         #FigureCanvas.updateGeometry(self)
 
 
     def plot_acc(self, time1, x, y):
-        self.ax1.cla()  #erase graph before draw a new one
-        self.ax1.plot(time1, x, label='x acceleration')#why doesn't the label show up?
-        self.ax1.plot(time1, y, label = 'y acceleration')
-        self.ax1.set_xlabel('time')#name of x axe
-        self.ax1.set_ylabel('acceleration')#name of y axe
-        #self.ax1.hold(False)#data reset when the new data come
+        self.ax.cla()  #erase graph before draw a new one
+        self.ax.plot(time1, x, label='x acceleration')#why doesn't the label show up?
+        self.ax.plot(time1, y, label = 'y acceleration')
+        self.ax.set_xlabel('time')#name of x axe
+        self.ax.set_ylabel('acceleration')#name of y axe
+        #self.ax.hold(False)#data reset when the new data come
         self.draw()
 
 
     def plot_temp(self, time, x):
-        self.ax1.cla()   #erase graph before draw a new one
-        self.ax1.plot(time, x, label = 'temp')
-        self.ax1.set_xlabel('time')#name of x axe
-        self.ax1.set_ylabel('temperature')#name of y axe
-        #self.ax1.hold(False)#data reset when the new data come
+        self.ax.cla()   #erase graph before draw a new one
+        self.ax.plot(time, x, label = 'temp')
+        self.ax.set_xlabel('time')#name of x axe
+        self.ax.set_ylabel('temperature')#name of y axe
+        #self.ax.hold(False)#data reset when the new data come
         self.draw()
 
 
